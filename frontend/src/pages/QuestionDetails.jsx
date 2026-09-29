@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   Link,
   useParams,
@@ -69,6 +70,9 @@ function QuestionDetails() {
   const attempts =
     question.attempts || 0;
 
+  const revisionHistory =
+    question.revisionHistory || [];
+
   return (
     <div className="question-details-page">
 
@@ -121,8 +125,6 @@ function QuestionDetails() {
           </div>
 
         </div>
-
-        {/* STATUS */}
 
         <div className="status-box">
 
@@ -216,7 +218,7 @@ function QuestionDetails() {
 
       </div>
 
-      {/* REVISION INFO */}
+      {/* REVISION STATUS */}
 
       <div className="details-section">
 
@@ -279,6 +281,91 @@ function QuestionDetails() {
 
       </div>
 
+      {/* REVISION HISTORY */}
+
+      <div className="details-section">
+
+        <h2>
+          🕒 Revision History
+        </h2>
+
+        {revisionHistory.length ===
+        0 ? (
+
+          <div className="info-box">
+
+            <strong>
+              No history available yet.
+            </strong>
+
+            <p>
+              Once you solve this question,
+              AlgoPilot will start tracking
+              its history.
+            </p>
+
+          </div>
+
+        ) : (
+
+          <div className="revision-history">
+
+            {revisionHistory.map(
+              (event, index) => (
+
+                <div
+                  className="history-item"
+                  key={`${event.date}-${index}`}
+                >
+
+                  <div className="history-icon">
+
+                    {event.type ===
+                    "solve"
+                      ? "🎯"
+                      : "📖"}
+
+                  </div>
+
+                  <div className="history-content">
+
+                    <strong>
+
+                      {event.type ===
+                      "solve"
+                        ? "First Solve"
+                        : `Revision #${event.revisionNumber}`}
+
+                    </strong>
+
+                    <span>
+
+                      {new Date(
+                        event.date
+                      ).toLocaleDateString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        )}
+
+      </div>
+
       {/* COMPANIES */}
 
       <div className="details-section">
@@ -291,12 +378,14 @@ function QuestionDetails() {
 
           {question.companies.map(
             (company) => (
+
               <span
                 key={company}
                 className="company-badge"
               >
                 {company}
               </span>
+
             )
           )}
 

@@ -5,6 +5,18 @@ function QuestionCard({
   completeQuestion,
   sessionType = "new",
 }) {
+  /*
+    If the question is already solved,
+    completing it means revision.
+
+    This also protects us when the
+    component is used outside Session.
+  */
+  const effectiveSessionType =
+    question.solved
+      ? "revision"
+      : sessionType;
+
   return (
     <div className="question-card">
 
@@ -42,8 +54,6 @@ function QuestionCard({
         {question.attempts || 0}
       </p>
 
-      {/* SOLVED INFORMATION */}
-
       {question.solved && (
         <>
           <p>
@@ -76,19 +86,13 @@ function QuestionCard({
         </>
       )}
 
-      {/* ACTIONS */}
-
       <div className="question-actions">
-
-        {/* QUESTION DETAILS */}
 
         <Link
           to={`/question/${question.id}`}
         >
           View Details →
         </Link>
-
-        {/* LEETCODE */}
 
         <a
           href={question.leetcodeUrl}
@@ -98,19 +102,16 @@ function QuestionCard({
           Open on LeetCode →
         </a>
 
-        {/* COMPLETE */}
-
         <button
           onClick={() =>
             completeQuestion(
               question.id,
-              sessionType
+              effectiveSessionType
             )
           }
         >
-          {sessionType === "revision"
-            ? "✓ Complete Revision"
-            : question.solved
+          {effectiveSessionType ===
+          "revision"
             ? "✓ Complete Revision"
             : "Mark as Solved"}
         </button>

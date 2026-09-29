@@ -14,9 +14,6 @@ function Session({
     completedNewCount +
     completedRevisionCount;
 
-  const remainingQuestions =
-    sessionQuestions.length;
-
   const progressPercentage =
     sessionTotalQuestions === 0
       ? 0
@@ -26,24 +23,27 @@ function Session({
             100
         );
 
+  const remainingQuestions =
+    sessionQuestions.length;
+
   return (
     <div className="session-page">
 
-      {/* -------------------------------- */}
-      {/* SESSION HEADER */}
-      {/* -------------------------------- */}
+      {/* HEADER */}
 
       <div className="session-header">
 
         <div>
+
           <h2>
             🎯 Today's DSA Session
           </h2>
 
           <p>
-            Keep going. Build consistency
-            every day.
+            Keep going. Build
+            consistency every day.
           </p>
+
         </div>
 
         <button
@@ -55,9 +55,7 @@ function Session({
 
       </div>
 
-      {/* -------------------------------- */}
       {/* PROGRESS */}
-      {/* -------------------------------- */}
 
       <div className="session-progress">
 
@@ -91,9 +89,7 @@ function Session({
 
       </div>
 
-      {/* -------------------------------- */}
       {/* SESSION SUMMARY */}
-      {/* -------------------------------- */}
 
       <div className="session-summary">
 
@@ -104,7 +100,7 @@ function Session({
           </span>
 
           <strong>
-            {completedNewCount}/
+            {completedNewCount} /{" "}
             {sessionNewCount}
           </strong>
 
@@ -117,7 +113,7 @@ function Session({
           </span>
 
           <strong>
-            {completedRevisionCount}/
+            {completedRevisionCount} /{" "}
             {sessionRevisionCount}
           </strong>
 
@@ -137,11 +133,10 @@ function Session({
 
       </div>
 
-      {/* -------------------------------- */}
       {/* SESSION COMPLETE */}
-      {/* -------------------------------- */}
 
-      {sessionQuestions.length === 0 ? (
+      {sessionQuestions.length ===
+      0 ? (
 
         <div className="session-complete">
 
@@ -158,29 +153,9 @@ function Session({
             today's DSA mission.
           </p>
 
-          <div className="completion-breakdown">
-
-            <p>
-              🎯 New Questions:{" "}
-              <strong>
-                {completedNewCount}/
-                {sessionNewCount}
-              </strong>
-            </p>
-
-            <p>
-              📖 Revisions:{" "}
-              <strong>
-                {completedRevisionCount}/
-                {sessionRevisionCount}
-              </strong>
-            </p>
-
-          </div>
-
           <p>
-            Consistency beats motivation.
-            Keep it up!
+            Consistency beats
+            motivation. Keep it up!
           </p>
 
           <button
@@ -194,10 +169,6 @@ function Session({
 
       ) : (
 
-        /* -------------------------------- */
-        /* QUESTIONS */
-        /* -------------------------------- */
-
         <div className="session-questions">
 
           <h3>
@@ -206,7 +177,6 @@ function Session({
 
           {sessionQuestions.map(
             (question) => (
-
               <div
                 className="session-question-wrapper"
                 key={question.id}
@@ -216,17 +186,13 @@ function Session({
 
                   {question.sessionType ===
                   "revision" ? (
-
                     <span>
                       📖 REVISION
                     </span>
-
                   ) : (
-
                     <span>
                       🎯 NEW QUESTION
                     </span>
-
                   )}
 
                 </div>
@@ -242,7 +208,6 @@ function Session({
                 />
 
               </div>
-
             )
           )}
 

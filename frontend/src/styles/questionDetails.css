@@ -33,6 +33,7 @@
   background: white;
   padding: 30px;
   border-radius: 16px;
+
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.08);
 
@@ -91,6 +92,7 @@
   background: white;
   padding: 25px;
   border-radius: 15px;
+
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.07);
 }
@@ -158,6 +160,56 @@
   color: #64748b;
 }
 
+.revision-history {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  padding: 16px 0;
+
+  border-bottom:
+    1px solid #e2e8f0;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-icon {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+}
+
+.history-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.history-content strong {
+  font-size: 15px;
+}
+
+.history-content span {
+  color: #64748b;
+  font-size: 13px;
+}
+
 .company-list {
   display: flex;
   flex-wrap: wrap;
@@ -193,11 +245,13 @@
   padding: 50px;
   border-radius: 15px;
   text-align: center;
+
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 @media (max-width: 900px) {
+
   .question-details-page {
     width: 90%;
   }
@@ -210,9 +264,11 @@
   .details-main-card {
     flex-direction: column;
   }
+
 }
 
 @media (max-width: 600px) {
+
   .details-grid {
     grid-template-columns: 1fr;
   }
@@ -226,4 +282,5 @@
     align-items: flex-start;
     gap: 15px;
   }
+
 }
