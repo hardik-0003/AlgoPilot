@@ -7,11 +7,52 @@ import {
 
 import Dashboard from "./pages/Dashboard";
 import QuestionDetails from "./pages/QuestionDetails";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+function ProtectedRoute({ children }) {
+  const currentUser =
+    localStorage.getItem(
+      "algoPilotCurrentUser"
+    );
+
+  if (!currentUser) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+function PublicRoute({ children }) {
+  const currentUser =
+    localStorage.getItem(
+      "algoPilotCurrentUser"
+    );
+
+  if (currentUser) {
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
 
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
+
+        {/* Home */}
 
         <Route
           path="/"
@@ -23,17 +64,64 @@ function App() {
           }
         />
 
+        {/* Login */}
+
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        {/* Signup */}
+
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
+
+        {/* Dashboard */}
+
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
+
+        {/* Question Details */}
 
         <Route
           path="/question/:id"
-          element={<QuestionDetails />}
+          element={
+            <ProtectedRoute>
+              <QuestionDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Unknown route */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

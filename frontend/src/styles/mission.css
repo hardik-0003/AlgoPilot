@@ -1,65 +1,142 @@
+/* ================================
+   DAILY MISSION
+================================ */
+
 .mission-card {
-  width: 750px;
-  margin: 40px auto;
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.mission-card h2 {
-  text-align: center;
-  margin-bottom: 30px;
+.mission-header {
+  margin-bottom: 25px;
 }
 
-.mission-item {
+.mission-header h2 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: #111827;
+}
+
+.mission-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ================================
+   CONTROLS
+================================ */
+
+.mission-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 25px;
+}
+
+.mission-control {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin: 25px 0;
-  font-size: 20px;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
 }
+
+.mission-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.mission-control-content {
+  flex: 1;
+}
+
+.mission-control-content h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: #111827;
+}
+
+.mission-control-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ================================
+   COUNTER
+================================ */
 
 .counter {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 8px;
 }
 
 .counter button {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  font-size: 22px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
   cursor: pointer;
+  font-size: 18px;
+  color: #374151;
 }
 
 .counter button:hover {
-  background: #1d4ed8;
+  background: #f3f4f6;
 }
 
 .counter span {
-  font-size: 24px;
-  font-weight: bold;
-  width: 40px;
+  min-width: 25px;
   text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
 }
 
-.start-btn {
+/* ================================
+   START BUTTON
+================================ */
+
+.start-session-btn {
   display: block;
-  margin: 30px auto 0;
-  padding: 12px 35px;
+  margin: 0 auto;
+  padding: 12px 24px;
   border: none;
-  border-radius: 10px;
-  background: #2563eb;
+  border-radius: 8px;
+  background: #111827;
   color: white;
-  font-size: 18px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.start-btn:hover {
-  background: #1d4ed8;
+.start-session-btn:hover {
+  background: #374151;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 700px) {
+  .mission-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-control {
+    flex-wrap: wrap;
+  }
+
+  .mission-control-content {
+    min-width: 180px;
+  }
 }

@@ -1,80 +1,77 @@
-function ProgressStats({ questions }) {
-  const solvedQuestions = questions.filter(
-    (question) => question.solved
-  );
+import "../styles/progress.css";
 
-  const easyCount = solvedQuestions.filter(
-    (question) => question.difficulty === "Easy"
-  ).length;
+function ProgressStats({
+  totalSolved,
+  easySolved,
+  mediumSolved,
+  hardSolved,
+  questions,
+}) {
+  const topicStats = {};
 
-  const mediumCount = solvedQuestions.filter(
-    (question) => question.difficulty === "Medium"
-  ).length;
+  questions.forEach((question) => {
+    if (question.solved) {
+      if (!topicStats[question.topic]) {
+        topicStats[question.topic] = 0;
+      }
 
-  const hardCount = solvedQuestions.filter(
-    (question) => question.difficulty === "Hard"
-  ).length;
-
-  const topicCount = {};
-
-  solvedQuestions.forEach((question) => {
-    topicCount[question.topic] =
-      (topicCount[question.topic] || 0) + 1;
+      topicStats[question.topic]++;
+    }
   });
 
   return (
-    <div className="progress-section">
+    <section className="progress-section">
+      <div className="progress-section-header">
+        <h2>📊 Your Progress</h2>
+        <p>Track your DSA progress by difficulty and topic.</p>
+      </div>
 
-      <h2>📊 Your Progress</h2>
-
-      <div className="progress-grid">
-
+      <div className="progress-stats-grid">
         <div className="progress-card">
           <h3>Total Solved</h3>
-          <h1>{solvedQuestions.length}</h1>
+          <strong>{totalSolved}</strong>
         </div>
 
         <div className="progress-card">
           <h3>Easy</h3>
-          <h1>{easyCount}</h1>
+          <strong>{easySolved}</strong>
         </div>
 
         <div className="progress-card">
           <h3>Medium</h3>
-          <h1>{mediumCount}</h1>
+          <strong>{mediumSolved}</strong>
         </div>
 
         <div className="progress-card">
           <h3>Hard</h3>
-          <h1>{hardCount}</h1>
+          <strong>{hardSolved}</strong>
         </div>
-
       </div>
 
-      <div className="topic-progress">
-
+      <div className="topics-progress">
         <h3>Topics Solved</h3>
 
-        {Object.keys(topicCount).length === 0 ? (
-          <p>No questions solved yet.</p>
+        {Object.keys(topicStats).length === 0 ? (
+          <p className="no-topic-progress">
+            No topics solved yet.
+          </p>
         ) : (
-          Object.entries(topicCount).map(
-            ([topic, count]) => (
-              <div
-                className="topic-row"
-                key={topic}
-              >
-                <span>{topic}</span>
-
-                <strong>{count}</strong>
-              </div>
-            )
-          )
+          <div className="topic-list">
+            {Object.entries(topicStats).map(
+              ([topic, count]) => (
+                <div
+                  className="topic-progress-item"
+                  key={topic}
+                >
+                  <span>{topic}</span>
+                  <strong>{count}</strong>
+                </div>
+              )
+            )}
+          </div>
         )}
-
       </div>
-
-    </div>
+    </section>
   );
 }
 

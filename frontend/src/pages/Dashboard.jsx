@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import StatsCard from "../components/StatsCard";
@@ -7,12 +7,9 @@ import QuestionCard from "../components/QuestionCard";
 import ProgressStats from "../components/ProgressStats";
 import Session from "../components/Session";
 
-import questionsData from "../data/questions";
+import initialQuestions from "../data/questions";
 
-import "../styles/card.css";
-import "../styles/mission.css";
-import "../styles/progress.css";
-import "../styles/Session.css";
+import "../styles/dashboard.css";
 
 function Dashboard() {
   const [solveQuestions, setSolveQuestions] =
@@ -60,128 +57,75 @@ function Dashboard() {
   const [completedNewCount, setCompletedNewCount] =
     useState(0);
 
-  const [
-    completedRevisionCount,
-    setCompletedRevisionCount,
-  ] = useState(0);
+  const [completedRevisionCount, setCompletedRevisionCount] =
+    useState(0);
 
   const [sessionStarted, setSessionStarted] =
     useState(false);
 
-  // ---------------------------------------
-  // NEXT REVISION DATE
-  // ---------------------------------------
+  /*
+   * ---------------------------------------
+   * CURRENT USER
+   * ---------------------------------------
+   */
 
-  function getNextRevisionDate(revisionCount) {
-    const date = new Date();
-
-    if (revisionCount === 0) {
-      date.setDate(
-        date.getDate() + 3
-      );
-    } else if (revisionCount === 1) {
-      date.setDate(
-        date.getDate() + 7
-      );
-    } else if (revisionCount === 2) {
-      date.setDate(
-        date.getDate() + 14
-      );
-    } else {
-      date.setDate(
-        date.getDate() + 30
-      );
-    }
-
-    return date.toISOString();
-  }
-
-  // ---------------------------------------
-  // LOAD QUESTIONS
-  // ---------------------------------------
-
-  useEffect(() => {
-    const savedQuestions =
+  const currentUser =
+    JSON.parse(
       localStorage.getItem(
-        "algoPilotQuestions"
-      );
+        "algoPilotCurrentUser"
+      )
+    );
 
-    if (savedQuestions) {
-      const parsedQuestions =
-        JSON.parse(savedQuestions);
+  /*
+   * Each user gets their own question storage.
+   */
 
-      // Add revisionHistory to older
-      // questions that don't have it.
-      const migratedQuestions =
-        parsedQuestions.map(
-          (question) => ({
-            ...question,
+  const userQuestionsKey =
+    currentUser
+      ? `algoPilotQuestions_${currentUser.id}`
+      : null;
 
-            revisionHistory:
-              question.revisionHistory ||
-              (question.solvedAt
-                ? [
-                    {
-                      type: "solve",
-                      date: question.solvedAt,
-                    },
-                  ]
-                : []),
-          })
-        );
+  /*
+   * ---------------------------------------
+   * REVISION DATE LOGIC
+   * ---------------------------------------
+   */
 
-      setQuestions(
-        migratedQuestions
-      );
-    } else {
-      const initialQuestions =
-        questionsData.map(
-          (question) => ({
-            ...question,
+  const getNextRevisionDate = (
+    revisionCount
+  ) => {
+    const today = new Date();
 
-            solved: false,
+    let daysToAdd = 3;
 
-            attempts: 0,
-
-            solvedAt: null,
-
-            revisionCount: 0,
-
-            nextRevision: null,
-
-            revisionHistory: [],
-          })
-        );
-
-      setQuestions(
-        initialQuestions
-      );
-    }
-  }, []);
-
-  // ---------------------------------------
-  // SAVE QUESTIONS
-  // ---------------------------------------
-
-  useEffect(() => {
-    if (questions.length > 0) {
-      localStorage.setItem(
-        "algoPilotQuestions",
-        JSON.stringify(questions)
-      );
-    }
-  }, [questions]);
-
-  // ---------------------------------------
-  // CHECK REVISION DUE
-  // ---------------------------------------
-
-  function isRevisionDue(question) {
-    if (!question.solved) {
-      return false;
+    if (revisionCount === 1) {
+      daysToAdd = 7;
+    } else if (revisionCount === 2) {
+      daysToAdd = 14;
+    } else if (revisionCount >= 3) {
+      daysToAdd = 30;
     }
 
-    if (!question.nextRevision) {
+    today.setDate(
+      today.getDate() + daysToAdd
+    );
+
+    return today.toISOString();
+  };
+
+  /*
+   * ---------------------------------------
+   * CHECK REVISION DUE
+   * ---------------------------------------
+   */
+
+  const isRevisionDue = (
+    question
+  ) => {
+    if (
+      !question.solved ||
+      !question.nextRevision
+    ) {
       return false;
     }
 
@@ -206,24 +150,142 @@ function Dashboard() {
       0
     );
 
-    return (
-      revisionDate <= today
-    );
-  }
+    return revisionDate <= today;
+  };
 
-  // ---------------------------------------
-  // COMPLETE QUESTION
-  // ---------------------------------------
+  /*
+   * ---------------------------------------
+   * LOAD USER QUESTIONS
+   * ---------------------------------------
+   */
 
-  function completeQuestion(
+  useEffect(() => {
+    if (!userQuestionsKey) {
+      return;
+    }
+
+    const savedQuestions =
+      localStorage.getItem(
+        userQuestionsKey
+      );
+
+    if (savedQuestions) {
+      const parsedQuestions =
+        JSON.parse(
+          savedQuestions
+        );
+
+      const migratedQuestions =
+        parsedQuestions.map(
+          (question) => {
+            if (
+              !question.revisionHistory
+            ) {
+              let history = [];
+
+              if (
+                question.solvedAt
+              ) {
+                history = [
+                  {
+                    type: "solve",
+                    date: question.solvedAt,
+                  },
+                ];
+              }
+
+              return {
+                ...question,
+                revisionHistory:
+                  history,
+              };
+            }
+
+            return question;
+          }
+        );
+
+      setQuestions(
+        migratedQuestions
+      );
+    } else {
+      /*
+       * Brand-new user gets a
+       * completely fresh Question Bank.
+       */
+
+      const preparedQuestions =
+        initialQuestions.map(
+          (question) => ({
+            ...question,
+
+            solved: false,
+
+            attempts: 0,
+
+            solvedAt: null,
+
+            revisionCount: 0,
+
+            nextRevision: null,
+
+            revisionHistory: [],
+          })
+        );
+
+      setQuestions(
+        preparedQuestions
+      );
+
+      localStorage.setItem(
+        userQuestionsKey,
+        JSON.stringify(
+          preparedQuestions
+        )
+      );
+    }
+  }, [userQuestionsKey]);
+
+  /*
+   * ---------------------------------------
+   * SAVE USER QUESTIONS
+   * ---------------------------------------
+   */
+
+  useEffect(() => {
+    if (
+      questions.length > 0 &&
+      userQuestionsKey
+    ) {
+      localStorage.setItem(
+        userQuestionsKey,
+        JSON.stringify(
+          questions
+        )
+      );
+    }
+  }, [
+    questions,
+    userQuestionsKey,
+  ]);
+
+  /*
+   * ---------------------------------------
+   * COMPLETE QUESTION
+   * ---------------------------------------
+   */
+
+  const completeQuestion = (
     id,
     sessionType = "new"
-  ) {
+  ) => {
     setQuestions(
-      (currentQuestions) =>
-        currentQuestions.map(
+      (prevQuestions) =>
+        prevQuestions.map(
           (question) => {
-            if (question.id !== id) {
+            if (
+              question.id !== id
+            ) {
               return question;
             }
 
@@ -231,17 +293,21 @@ function Dashboard() {
               question.revisionHistory ||
               [];
 
-            // --------------------------------
-            // FIRST TIME SOLVE
-            // --------------------------------
+            const currentRevisionCount =
+              question.revisionCount ||
+              0;
+
+            const currentAttempts =
+              question.attempts ||
+              0;
+
+            /*
+             * NEW QUESTION
+             */
 
             if (
               sessionType === "new"
             ) {
-              const revisionCount =
-                question.revisionCount ||
-                0;
-
               const solvedDate =
                 new Date().toISOString();
 
@@ -251,22 +317,23 @@ function Dashboard() {
                 solved: true,
 
                 attempts:
-                  (question.attempts ||
-                    0) + 1,
+                  currentAttempts +
+                  1,
 
                 solvedAt:
                   solvedDate,
 
                 revisionCount:
-                  revisionCount,
+                  currentRevisionCount,
 
                 nextRevision:
                   getNextRevisionDate(
-                    revisionCount
+                    currentRevisionCount
                   ),
 
                 revisionHistory: [
                   ...currentHistory,
+
                   {
                     type: "solve",
                     date: solvedDate,
@@ -275,16 +342,13 @@ function Dashboard() {
               };
             }
 
-            // --------------------------------
-            // REVISION
-            // --------------------------------
-
-            const currentRevisionCount =
-              question.revisionCount ||
-              0;
+            /*
+             * REVISION
+             */
 
             const newRevisionCount =
-              currentRevisionCount + 1;
+              currentRevisionCount +
+              1;
 
             const revisionDate =
               new Date().toISOString();
@@ -295,8 +359,8 @@ function Dashboard() {
               solved: true,
 
               attempts:
-                (question.attempts ||
-                  0) + 1,
+                currentAttempts +
+                1,
 
               revisionCount:
                 newRevisionCount,
@@ -308,10 +372,13 @@ function Dashboard() {
 
               revisionHistory: [
                 ...currentHistory,
+
                 {
                   type: "revision",
+
                   revisionNumber:
                     newRevisionCount,
+
                   date: revisionDate,
                 },
               ],
@@ -320,39 +387,103 @@ function Dashboard() {
         )
     );
 
+    /*
+     * Session counters
+     */
+
     if (
       sessionType === "revision"
     ) {
       setCompletedRevisionCount(
-        (count) => count + 1
+        (prev) => prev + 1
       );
     } else {
       setCompletedNewCount(
-        (count) => count + 1
+        (prev) => prev + 1
       );
     }
 
+    /*
+     * Remove completed question
+     * from current session.
+     */
+
     setSessionQuestions(
-      (currentSession) =>
-        currentSession.filter(
+      (prev) =>
+        prev.filter(
           (question) =>
             question.id !== id
         )
     );
-  }
+  };
 
-  // ---------------------------------------
-  // START SESSION
-  // ---------------------------------------
+  /*
+   * ---------------------------------------
+   * DIFFICULTY WEIGHT
+   * ---------------------------------------
+   */
 
-  function startSession() {
-    const dueRevisionQuestions =
-      questions.filter(
-        isRevisionDue
-      );
+  const getDifficultyWeight = (
+    difficulty
+  ) => {
+    if (
+      difficulty === "Easy"
+    ) {
+      return 1;
+    }
 
-    const selectedRevisionQuestions =
-      dueRevisionQuestions
+    if (
+      difficulty === "Medium"
+    ) {
+      return 2;
+    }
+
+    if (
+      difficulty === "Hard"
+    ) {
+      return 3;
+    }
+
+    return 0;
+  };
+
+  /*
+   * ---------------------------------------
+   * START SMART DAILY SESSION
+   * ---------------------------------------
+   */
+
+  const startSession = () => {
+    /*
+     * Due revisions first.
+     */
+
+    const dueRevisions =
+      questions
+        .filter(
+          (question) =>
+            isRevisionDue(
+              question
+            )
+        )
+        .sort(
+          (a, b) => {
+            const dateA =
+              new Date(
+                a.nextRevision
+              ).getTime();
+
+            const dateB =
+              new Date(
+                b.nextRevision
+              ).getTime();
+
+            return dateA - dateB;
+          }
+        );
+
+    const selectedRevisions =
+      dueRevisions
         .slice(
           0,
           revisionQuestions
@@ -365,22 +496,59 @@ function Dashboard() {
           })
         );
 
+    /*
+     * New questions:
+     * importance first,
+     * then Easy → Medium → Hard.
+     */
+
     const unsolvedQuestions =
-      questions.filter(
-        (question) =>
-          !question.solved
-      );
+      questions
+        .filter(
+          (question) =>
+            !question.solved
+        )
+        .sort(
+          (a, b) => {
+            const importanceA =
+              Number(
+                a.importance
+              ) || 0;
+
+            const importanceB =
+              Number(
+                b.importance
+              ) || 0;
+
+            if (
+              importanceA !==
+              importanceB
+            ) {
+              return (
+                importanceB -
+                importanceA
+              );
+            }
+
+            const difficultyA =
+              getDifficultyWeight(
+                a.difficulty
+              );
+
+            const difficultyB =
+              getDifficultyWeight(
+                b.difficulty
+              );
+
+            return (
+              difficultyA -
+              difficultyB
+            );
+          }
+        );
 
     const selectedNewQuestions =
       unsolvedQuestions
-        .filter(
-          (question) =>
-            !selectedRevisionQuestions.some(
-              (revisionQuestion) =>
-                revisionQuestion.id ===
-                question.id
-            )
-        )
         .slice(
           0,
           solveQuestions
@@ -393,7 +561,7 @@ function Dashboard() {
         );
 
     const newSession = [
-      ...selectedRevisionQuestions,
+      ...selectedRevisions,
       ...selectedNewQuestions,
     ];
 
@@ -410,23 +578,25 @@ function Dashboard() {
     );
 
     setSessionRevisionCount(
-      selectedRevisionQuestions.length
+      selectedRevisions.length
     );
 
     setCompletedNewCount(0);
 
-    setCompletedRevisionCount(0);
+    setCompletedRevisionCount(
+      0
+    );
 
     setSessionStarted(true);
-  }
+  };
 
-  // ---------------------------------------
-  // END SESSION
-  // ---------------------------------------
+  /*
+   * ---------------------------------------
+   * END SESSION
+   * ---------------------------------------
+   */
 
-  function endSession() {
-    setSessionStarted(false);
-
+  const endSession = () => {
     setSessionQuestions([]);
 
     setSessionTotalQuestions(0);
@@ -438,13 +608,38 @@ function Dashboard() {
     setCompletedNewCount(0);
 
     setCompletedRevisionCount(0);
-  }
 
-  // ---------------------------------------
-  // FILTER VALUES
-  // ---------------------------------------
+    setSessionStarted(false);
+  };
+
+  /*
+   * ---------------------------------------
+   * FILTER OPTIONS
+   * ---------------------------------------
+   */
+
+  const topics = [
+    "All",
+    ...new Set(
+      questions.map(
+        (question) =>
+          question.topic
+      )
+    ),
+  ];
+
+  const patterns = [
+    "All",
+    ...new Set(
+      questions.map(
+        (question) =>
+          question.pattern
+      )
+    ),
+  ];
 
   const companies = [
+    "All",
     "Google",
     "Microsoft",
     "Amazon",
@@ -455,265 +650,351 @@ function Dashboard() {
     "Bloomberg",
   ];
 
-  const topics = [
-    ...new Set(
-      questions.map(
-        (question) =>
-          question.topic
-      )
-    ),
-  ];
-
-  const patterns = [
-    ...new Set(
-      questions.map(
-        (question) =>
-          question.pattern
-      )
-    ),
-  ];
-
-  // ---------------------------------------
-  // FILTER QUESTIONS
-  // ---------------------------------------
+  /*
+   * ---------------------------------------
+   * FILTER QUESTIONS
+   * ---------------------------------------
+   */
 
   const filteredQuestions =
-    questions.filter(
-      (question) => {
-        const searchText =
-          search.toLowerCase();
+    questions
+      .filter(
+        (question) => {
+          const matchesSearch =
+            question.title
+              .toLowerCase()
+              .includes(
+                search.toLowerCase()
+              );
 
-        const matchesSearch =
-          question.title
-            .toLowerCase()
-            .includes(searchText) ||
-          question.topic
-            .toLowerCase()
-            .includes(searchText) ||
-          question.pattern
-            .toLowerCase()
-            .includes(searchText) ||
-          question.companies.some(
-            (companyName) =>
-              companyName
-                .toLowerCase()
-                .includes(searchText)
+          const matchesStatus =
+            status === "All" ||
+            (status ===
+              "Solved" &&
+              question.solved) ||
+            (status ===
+              "Unsolved" &&
+              !question.solved) ||
+            (status ===
+              "Revision Due" &&
+              isRevisionDue(
+                question
+              ));
+
+          const matchesDifficulty =
+            difficulty ===
+              "All" ||
+            question.difficulty ===
+              difficulty;
+
+          const matchesTopic =
+            topic === "All" ||
+            question.topic ===
+              topic;
+
+          const matchesPattern =
+            pattern === "All" ||
+            question.pattern ===
+              pattern;
+
+          const matchesCompany =
+            company === "All" ||
+            question.companies.includes(
+              company
+            );
+
+          return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesDifficulty &&
+            matchesTopic &&
+            matchesPattern &&
+            matchesCompany
           );
+        }
+      )
+      .sort(
+        (a, b) => {
+          if (
+            sortBy ===
+            "difficulty"
+          ) {
+            return (
+              getDifficultyWeight(
+                a.difficulty
+              ) -
+              getDifficultyWeight(
+                b.difficulty
+              )
+            );
+          }
 
-        const matchesStatus =
-          status === "All" ||
-          (status === "Solved" &&
-            question.solved) ||
-          (status === "Unsolved" &&
-            !question.solved) ||
-          (status === "Revision Due" &&
-            isRevisionDue(question));
+          if (
+            sortBy ===
+            "importance"
+          ) {
+            return (
+              (Number(
+                b.importance
+              ) || 0) -
+              (Number(
+                a.importance
+              ) || 0)
+            );
+          }
 
-        const matchesDifficulty =
-          difficulty === "All" ||
-          question.difficulty ===
-            difficulty;
-
-        const matchesTopic =
-          topic === "All" ||
-          question.topic === topic;
-
-        const matchesPattern =
-          pattern === "All" ||
-          question.pattern ===
-            pattern;
-
-        const matchesCompany =
-          company === "All" ||
-          question.companies.includes(
-            company
-          );
-
-        return (
-          matchesSearch &&
-          matchesStatus &&
-          matchesDifficulty &&
-          matchesTopic &&
-          matchesPattern &&
-          matchesCompany
-        );
-      }
-    );
-
-  // ---------------------------------------
-  // SORT QUESTIONS
-  // ---------------------------------------
-
-  const difficultyOrder = {
-    Easy: 1,
-    Medium: 2,
-    Hard: 3,
-  };
-
-  const importanceOrder = {
-    High: 1,
-    Medium: 2,
-    Low: 3,
-  };
-
-  const sortedQuestions = [
-    ...filteredQuestions,
-  ].sort((a, b) => {
-    if (sortBy === "difficulty") {
-      return (
-        difficultyOrder[
-          a.difficulty
-        ] -
-        difficultyOrder[
-          b.difficulty
-        ]
+          return 0;
+        }
       );
-    }
 
-    if (sortBy === "importance") {
-      return (
-        importanceOrder[
-          a.importance
-        ] -
-        importanceOrder[
-          b.importance
-        ]
-      );
-    }
+  /*
+   * ---------------------------------------
+   * STATS
+   * ---------------------------------------
+   */
 
-    return 0;
-  });
+  const totalQuestions =
+    questions.length;
 
-  // ---------------------------------------
-  // DASHBOARD STATS
-  // ---------------------------------------
-
-  const solvedCount =
+  const solvedQuestions =
     questions.filter(
       (question) =>
         question.solved
     ).length;
 
-  const revisionDueQuestions =
+  const revisionDueCount =
     questions.filter(
-      isRevisionDue
-    );
+      (question) =>
+        isRevisionDue(
+          question
+        )
+    ).length;
 
-  // ---------------------------------------
-  // UI
-  // ---------------------------------------
+  const easySolved =
+    questions.filter(
+      (question) =>
+        question.solved &&
+        question.difficulty ===
+          "Easy"
+    ).length;
+
+  const mediumSolved =
+    questions.filter(
+      (question) =>
+        question.solved &&
+        question.difficulty ===
+          "Medium"
+    ).length;
+
+  const hardSolved =
+    questions.filter(
+      (question) =>
+        question.solved &&
+        question.difficulty ===
+          "Hard"
+    ).length;
+
+  /*
+   * ---------------------------------------
+   * SESSION PAGE
+   * ---------------------------------------
+   */
+
+  if (sessionStarted) {
+    return (
+      <Session
+        sessionQuestions={
+          sessionQuestions
+        }
+        sessionTotalQuestions={
+          sessionTotalQuestions
+        }
+        sessionNewCount={
+          sessionNewCount
+        }
+        sessionRevisionCount={
+          sessionRevisionCount
+        }
+        completedNewCount={
+          completedNewCount
+        }
+        completedRevisionCount={
+          completedRevisionCount
+        }
+        completeQuestion={
+          completeQuestion
+        }
+        endSession={
+          endSession
+        }
+      />
+    );
+  }
+
+  /*
+   * ---------------------------------------
+   * DASHBOARD
+   * ---------------------------------------
+   */
 
   return (
     <div>
+
       <Header />
 
-      {!sessionStarted && (
-        <>
-          <div className="stats-container">
+      <main className="dashboard">
 
-            <StatsCard
-              title="Total Questions"
-              value={
-                questions.length
-              }
-            />
+        <div className="dashboard-title">
 
-            <StatsCard
-              title="Solved"
-              value={
-                solvedCount
-              }
-            />
+          <h2>
+            Dashboard
+          </h2>
 
-            <StatsCard
-              title="Revision Due"
-              value={
-                revisionDueQuestions.length
-              }
-            />
+          <p>
+            Track your DSA progress and
+            build consistency.
+          </p>
 
-            <StatsCard
-              title="Remaining"
-              value={
-                questions.length -
-                solvedCount
-              }
-            />
+        </div>
+
+        {/* STATS */}
+
+        <div className="stats-grid">
+
+          <StatsCard
+            title="Total Questions"
+            value={
+              totalQuestions
+            }
+          />
+
+          <StatsCard
+            title="Solved"
+            value={
+              solvedQuestions
+            }
+          />
+
+          <StatsCard
+            title="Revision Due"
+            value={
+              revisionDueCount
+            }
+          />
+
+          <StatsCard
+            title="Progress"
+            value={
+              totalQuestions ===
+              0
+                ? "0%"
+                : `${Math.round(
+                    (solvedQuestions /
+                      totalQuestions) *
+                      100
+                  )}%`
+            }
+          />
+
+        </div>
+
+        {/* DAILY MISSION */}
+
+        <MissionCard
+          solveQuestions={
+            solveQuestions
+          }
+          setSolveQuestions={
+            setSolveQuestions
+          }
+          revisionQuestions={
+            revisionQuestions
+          }
+          setRevisionQuestions={
+            setRevisionQuestions
+          }
+          startSession={
+            startSession
+          }
+        />
+
+        {/* PROGRESS */}
+
+        <ProgressStats
+          totalSolved={
+            solvedQuestions
+          }
+          easySolved={
+            easySolved
+          }
+          mediumSolved={
+            mediumSolved
+          }
+          hardSolved={
+            hardSolved
+          }
+          questions={
+            questions
+          }
+        />
+
+        {/* REVISION DUE */}
+
+        <section className="question-section">
+
+          <div className="section-header">
+
+            <div>
+
+              <h2>
+                📖 Revision Due
+              </h2>
+
+              <p>
+                Questions that are
+                ready for revision.
+              </p>
+
+            </div>
 
           </div>
 
-          <MissionCard
-            solveQuestions={
-              solveQuestions
-            }
-            setSolveQuestions={
-              setSolveQuestions
-            }
-            revisionQuestions={
-              revisionQuestions
-            }
-            setRevisionQuestions={
-              setRevisionQuestions
-            }
-            startSession={
-              startSession
-            }
-          />
-        </>
-      )}
+          {revisionDueCount ===
+          0 ? (
+            <div className="empty-state">
 
-      {sessionStarted && (
-        <Session
-          sessionQuestions={
-            sessionQuestions
-          }
-          sessionTotalQuestions={
-            sessionTotalQuestions
-          }
-          sessionNewCount={
-            sessionNewCount
-          }
-          sessionRevisionCount={
-            sessionRevisionCount
-          }
-          completedNewCount={
-            completedNewCount
-          }
-          completedRevisionCount={
-            completedRevisionCount
-          }
-          completeQuestion={
-            completeQuestion
-          }
-          endSession={
-            endSession
-          }
-        />
-      )}
+              <h3>
+                🎉 No revisions due!
+              </h3>
 
-      {!sessionStarted && (
-        <>
-          <ProgressStats
-            questions={questions}
-          />
-
-          {/* REVISION DUE */}
-
-          <div className="question-section">
-
-            <h2>
-              📖 Revision Due
-            </h2>
-
-            {revisionDueQuestions.length ===
-            0 ? (
               <p>
-                No revisions due today 🎉
+                You're all caught up.
+                Keep solving new
+                questions.
               </p>
-            ) : (
-              <div className="question-list">
 
-                {revisionDueQuestions.map(
+            </div>
+          ) : (
+            <div className="question-list">
+
+              {questions
+                .filter(
+                  (question) =>
+                    isRevisionDue(
+                      question
+                    )
+                )
+                .sort(
+                  (a, b) =>
+                    new Date(
+                      a.nextRevision
+                    ).getTime() -
+                    new Date(
+                      b.nextRevision
+                    ).getTime()
+                )
+                .slice(0, 5)
+                .map(
                   (question) => (
                     <QuestionCard
                       key={
@@ -730,228 +1011,231 @@ function Dashboard() {
                   )
                 )}
 
-              </div>
-            )}
+            </div>
+          )}
+
+        </section>
+
+        {/* QUESTION BANK */}
+
+        <section className="question-section">
+
+          <div className="section-header">
+
+            <div>
+
+              <h2>
+                📚 Question Bank
+              </h2>
+
+              <p>
+                Practice important
+                interview questions.
+              </p>
+
+            </div>
 
           </div>
 
-          {/* QUESTION BANK */}
+          {/* FILTERS */}
 
-          <div className="question-section">
-
-            <h2>
-              📚 Question Bank
-            </h2>
+          <div className="filters">
 
             <input
               type="text"
-              className="search-input"
               placeholder="Search questions..."
               value={search}
-              onChange={(event) =>
+              onChange={(e) =>
                 setSearch(
-                  event.target.value
+                  e.target.value
                 )
               }
             />
 
-            <div className="filters">
+            <select
+              value={status}
+              onChange={(e) =>
+                setStatus(
+                  e.target.value
+                )
+              }
+            >
+              <option value="All">
+                All Status
+              </option>
 
-              <select
-                value={status}
-                onChange={(event) =>
-                  setStatus(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="All">
-                  All Questions
-                </option>
+              <option value="Solved">
+                Solved
+              </option>
 
-                <option value="Solved">
-                  Solved
-                </option>
+              <option value="Unsolved">
+                Unsolved
+              </option>
 
-                <option value="Unsolved">
-                  Unsolved
-                </option>
+              <option value="Revision Due">
+                Revision Due
+              </option>
+            </select>
 
-                <option value="Revision Due">
-                  Revision Due
-                </option>
-              </select>
+            <select
+              value={difficulty}
+              onChange={(e) =>
+                setDifficulty(
+                  e.target.value
+                )
+              }
+            >
+              <option value="All">
+                All Difficulty
+              </option>
 
-              <select
-                value={difficulty}
-                onChange={(event) =>
-                  setDifficulty(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="All">
-                  All Difficulties
-                </option>
+              <option value="Easy">
+                Easy
+              </option>
 
-                <option value="Easy">
-                  Easy
-                </option>
+              <option value="Medium">
+                Medium
+              </option>
 
-                <option value="Medium">
-                  Medium
-                </option>
+              <option value="Hard">
+                Hard
+              </option>
+            </select>
 
-                <option value="Hard">
-                  Hard
-                </option>
-              </select>
+            <select
+              value={topic}
+              onChange={(e) =>
+                setTopic(
+                  e.target.value
+                )
+              }
+            >
+              {topics.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item ===
+                    "All"
+                      ? "All Topics"
+                      : item}
+                  </option>
+                )
+              )}
+            </select>
 
-              <select
-                value={topic}
-                onChange={(event) =>
-                  setTopic(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="All">
-                  All Topics
-                </option>
+            <select
+              value={pattern}
+              onChange={(e) =>
+                setPattern(
+                  e.target.value
+                )
+              }
+            >
+              {patterns.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item ===
+                    "All"
+                      ? "All Patterns"
+                      : item}
+                  </option>
+                )
+              )}
+            </select>
 
-                {topics.map(
-                  (topicName) => (
-                    <option
-                      key={topicName}
-                      value={topicName}
-                    >
-                      {topicName}
-                    </option>
-                  )
-                )}
-              </select>
+            <select
+              value={company}
+              onChange={(e) =>
+                setCompany(
+                  e.target.value
+                )
+              }
+            >
+              {companies.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item ===
+                    "All"
+                      ? "All Companies"
+                      : item}
+                  </option>
+                )
+              )}
+            </select>
 
-              <select
-                value={pattern}
-                onChange={(event) =>
-                  setPattern(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="All">
-                  All Patterns
-                </option>
+            <select
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(
+                  e.target.value
+                )
+              }
+            >
+              <option value="default">
+                Default Order
+              </option>
 
-                {patterns.map(
-                  (patternName) => (
-                    <option
-                      key={patternName}
-                      value={patternName}
-                    >
-                      {patternName}
-                    </option>
-                  )
-                )}
-              </select>
+              <option value="difficulty">
+                Difficulty
+              </option>
 
-              <select
-                value={company}
-                onChange={(event) =>
-                  setCompany(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="All">
-                  All Companies
-                </option>
+              <option value="importance">
+                Importance
+              </option>
+            </select>
 
-                {companies.map(
-                  (companyName) => (
-                    <option
-                      key={companyName}
-                      value={companyName}
-                    >
-                      {companyName}
-                    </option>
-                  )
-                )}
-              </select>
+          </div>
 
-              <select
-                value={sortBy}
-                onChange={(event) =>
-                  setSortBy(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="default">
-                  Sort: Default
-                </option>
+          {/* QUESTIONS */}
 
-                <option value="difficulty">
-                  Difficulty: Easy → Hard
-                </option>
+          {filteredQuestions.length ===
+          0 ? (
+            <div className="empty-state">
 
-                <option value="importance">
-                  Importance: High → Low
-                </option>
-              </select>
+              <h3>
+                No questions found
+              </h3>
+
+              <p>
+                Try changing your
+                filters.
+              </p>
 
             </div>
-
-            <p className="results-count">
-
-              Showing{" "}
-
-              <strong>
-                {
-                  sortedQuestions.length
-                }
-              </strong>{" "}
-
-              of{" "}
-
-              <strong>
-                {questions.length}
-              </strong>{" "}
-
-              questions
-
-            </p>
-
+          ) : (
             <div className="question-list">
 
-              {sortedQuestions.length ===
-              0 ? (
-                <p>
-                  No questions found.
-                </p>
-              ) : (
-                sortedQuestions.map(
-                  (question) => (
-                    <QuestionCard
-                      key={
-                        question.id
-                      }
-                      question={
-                        question
-                      }
-                      completeQuestion={
-                        completeQuestion
-                      }
-                    />
-                  )
+              {filteredQuestions.map(
+                (question) => (
+                  <QuestionCard
+                    key={
+                      question.id
+                    }
+                    question={
+                      question
+                    }
+                    completeQuestion={
+                      completeQuestion
+                    }
+                  />
                 )
               )}
 
             </div>
+          )}
 
-          </div>
-        </>
-      )}
+        </section>
+
+      </main>
+
     </div>
   );
 }
