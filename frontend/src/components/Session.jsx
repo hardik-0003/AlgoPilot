@@ -1,5 +1,7 @@
 import QuestionCard from "./QuestionCard";
 
+import "../styles/Session.css";
+
 function Session({
   sessionQuestions,
   sessionTotalQuestions,
@@ -33,17 +35,14 @@ function Session({
 
       <div className="session-header">
 
-        <div>
-
+        <div className="session-header-content">
           <h2>
             🎯 Today's DSA Session
           </h2>
 
           <p>
-            Keep going. Build
-            consistency every day.
+            Keep going. Build consistency every day.
           </p>
-
         </div>
 
         <button
@@ -95,39 +94,63 @@ function Session({
 
         <div className="session-summary-card">
 
-          <span>
-            🎯 New Questions
-          </span>
+          <div className="summary-icon">
+            🎯
+          </div>
 
-          <strong>
-            {completedNewCount} /{" "}
-            {sessionNewCount}
-          </strong>
+          <div className="summary-content">
 
-        </div>
+            <span>
+              New Questions
+            </span>
 
-        <div className="session-summary-card">
+            <strong>
+              {completedNewCount} /{" "}
+              {sessionNewCount}
+            </strong>
 
-          <span>
-            📖 Revisions
-          </span>
-
-          <strong>
-            {completedRevisionCount} /{" "}
-            {sessionRevisionCount}
-          </strong>
+          </div>
 
         </div>
 
         <div className="session-summary-card">
 
-          <span>
-            ⏳ Remaining
-          </span>
+          <div className="summary-icon">
+            📖
+          </div>
 
-          <strong>
-            {remainingQuestions}
-          </strong>
+          <div className="summary-content">
+
+            <span>
+              Revisions
+            </span>
+
+            <strong>
+              {completedRevisionCount} /{" "}
+              {sessionRevisionCount}
+            </strong>
+
+          </div>
+
+        </div>
+
+        <div className="session-summary-card">
+
+          <div className="summary-icon">
+            ⏳
+          </div>
+
+          <div className="summary-content">
+
+            <span>
+              Remaining
+            </span>
+
+            <strong>
+              {remainingQuestions}
+            </strong>
+
+          </div>
 
         </div>
 
@@ -135,8 +158,7 @@ function Session({
 
       {/* SESSION COMPLETE */}
 
-      {sessionQuestions.length ===
-      0 ? (
+      {sessionQuestions.length === 0 ? (
 
         <div className="session-complete">
 
@@ -154,8 +176,8 @@ function Session({
           </p>
 
           <p>
-            Consistency beats
-            motivation. Keep it up!
+            Consistency beats motivation.
+            Keep it up!
           </p>
 
           <button
@@ -171,45 +193,70 @@ function Session({
 
         <div className="session-questions">
 
-          <h3>
-            Today's Questions
-          </h3>
+          <div className="session-questions-header">
 
-          {sessionQuestions.map(
-            (question) => (
-              <div
-                className="session-question-wrapper"
-                key={question.id}
-              >
+            <div>
+              <h3>
+                Today's Questions
+              </h3>
 
-                <div className="question-type">
+              <p>
+                Complete each question to finish
+                your practice session.
+              </p>
+            </div>
 
-                  {question.sessionType ===
-                  "revision" ? (
-                    <span>
-                      📖 REVISION
-                    </span>
-                  ) : (
-                    <span>
-                      🎯 NEW QUESTION
-                    </span>
-                  )}
+            <span className="questions-count">
+              {sessionQuestions.length} remaining
+            </span>
+
+          </div>
+
+          <div className="session-question-grid">
+
+            {sessionQuestions.map(
+              (question) => (
+
+                <div
+                  className="session-question-wrapper"
+                  key={question.id}
+                >
+
+                  <div className="question-type">
+
+                    {question.sessionType ===
+                    "revision" ? (
+
+                      <span>
+                        📖 REVISION
+                      </span>
+
+                    ) : (
+
+                      <span>
+                        🎯 NEW QUESTION
+                      </span>
+
+                    )}
+
+                  </div>
+
+                  <QuestionCard
+                    question={question}
+                    completeQuestion={
+                      completeQuestion
+                    }
+                    sessionType={
+                      question.sessionType
+                    }
+                  />
 
                 </div>
 
-                <QuestionCard
-                  question={question}
-                  completeQuestion={
-                    completeQuestion
-                  }
-                  sessionType={
-                    question.sessionType
-                  }
-                />
+              )
+            )}
 
-              </div>
-            )
-          )}
+          </div>
 
         </div>
 

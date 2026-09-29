@@ -1,17 +1,12 @@
 import { Link } from "react-router-dom";
 
+import "../styles/card.css";
+
 function QuestionCard({
   question,
   completeQuestion,
   sessionType = "new",
 }) {
-  /*
-    If the question is already solved,
-    completing it means revision.
-
-    This also protects us when the
-    component is used outside Session.
-  */
   const effectiveSessionType =
     question.solved
       ? "revision"

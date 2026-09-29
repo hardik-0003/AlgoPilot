@@ -6,6 +6,7 @@ import MissionCard from "../components/MissionCard";
 import QuestionCard from "../components/QuestionCard";
 import ProgressStats from "../components/ProgressStats";
 import Session from "../components/Session";
+import PracticePanel from "../components/PracticePanel";
 
 import initialQuestions from "../data/questions";
 
@@ -75,10 +76,6 @@ function Dashboard() {
         "algoPilotCurrentUser"
       )
     );
-
-  /*
-   * Each user gets their own question storage.
-   */
 
   const userQuestionsKey =
     currentUser
@@ -175,45 +172,90 @@ function Dashboard() {
           savedQuestions
         );
 
-      const migratedQuestions =
-        parsedQuestions.map(
+      const existingById =
+        new Map(
+          parsedQuestions.map(
+            (question) => [
+              question.id,
+              question,
+            ]
+          )
+        );
+
+      const builtInIds =
+        new Set(
+          initialQuestions.map(
+            (question) =>
+              question.id
+          )
+        );
+
+      const mergedQuestions =
+        initialQuestions.map(
           (question) => {
-            if (
-              !question.revisionHistory
-            ) {
-              let history = [];
+            const existing =
+              existingById.get(
+                question.id
+              );
 
-              if (
-                question.solvedAt
-              ) {
-                history = [
-                  {
-                    type: "solve",
-                    date: question.solvedAt,
-                  },
-                ];
-              }
-
+            if (!existing) {
               return {
                 ...question,
-                revisionHistory:
-                  history,
+                solved: false,
+                attempts: 0,
+                solvedAt: null,
+                revisionCount: 0,
+                nextRevision: null,
+                revisionHistory: [],
               };
             }
 
-            return question;
+            return {
+              ...question,
+              ...existing,
+
+              title: question.title,
+              difficulty: question.difficulty,
+              topic: question.topic,
+              pattern: question.pattern,
+              patternId: question.patternId,
+              concept: question.concept,
+              stage: question.stage,
+              importance: question.importance,
+              companies: question.companies,
+              learningOrder:
+                question.learningOrder,
+              leetcodeUrl:
+                question.leetcodeUrl,
+
+              revisionHistory:
+                existing.revisionHistory ||
+                (existing.solvedAt
+                  ? [
+                      {
+                        type: "solve",
+                        date:
+                          existing.solvedAt,
+                      },
+                    ]
+                  : []),
+            };
           }
         );
 
-      setQuestions(
-        migratedQuestions
-      );
-    } else {
-      /*
-       * Brand-new user gets a
-       * completely fresh Question Bank.
-       */
+      const customQuestions =
+        parsedQuestions.filter(
+          (question) =>
+            !builtInIds.has(
+              question.id
+            )
+        );
 
+      setQuestions([
+        ...mergedQuestions,
+        ...customQuestions,
+      ]);
+    } else {
       const preparedQuestions =
         initialQuestions.map(
           (question) => ({
@@ -387,10 +429,6 @@ function Dashboard() {
         )
     );
 
-    /*
-     * Session counters
-     */
-
     if (
       sessionType === "revision"
     ) {
@@ -402,11 +440,6 @@ function Dashboard() {
         (prev) => prev + 1
       );
     }
-
-    /*
-     * Remove completed question
-     * from current session.
-     */
 
     setSessionQuestions(
       (prev) =>
@@ -449,15 +482,41 @@ function Dashboard() {
 
   /*
    * ---------------------------------------
+   * IMPORTANCE WEIGHT
+   * ---------------------------------------
+   */
+
+  const getImportanceWeight = (
+    importance
+  ) => {
+    if (
+      importance === "High"
+    ) {
+      return 3;
+    }
+
+    if (
+      importance === "Medium"
+    ) {
+      return 2;
+    }
+
+    if (
+      importance === "Low"
+    ) {
+      return 1;
+    }
+
+    return 0;
+  };
+
+  /*
+   * ---------------------------------------
    * START SMART DAILY SESSION
    * ---------------------------------------
    */
 
   const startSession = () => {
-    /*
-     * Due revisions first.
-     */
-
     const dueRevisions =
       questions
         .filter(
@@ -496,12 +555,6 @@ function Dashboard() {
           })
         );
 
-    /*
-     * New questions:
-     * importance first,
-     * then Easy → Medium → Hard.
-     */
-
     const unsolvedQuestions =
       questions
         .filter(
@@ -511,14 +564,14 @@ function Dashboard() {
         .sort(
           (a, b) => {
             const importanceA =
-              Number(
+              getImportanceWeight(
                 a.importance
-              ) || 0;
+              );
 
             const importanceB =
-              Number(
+              getImportanceWeight(
                 b.importance
-              ) || 0;
+              );
 
             if (
               importanceA !==
@@ -579,6 +632,55 @@ function Dashboard() {
 
     setSessionRevisionCount(
       selectedRevisions.length
+    );
+
+    setCompletedNewCount(0);
+
+    setCompletedRevisionCount(
+      0
+    );
+
+    setSessionStarted(true);
+  };
+
+  /*
+   * ---------------------------------------
+   * START PATTERN PRACTICE
+   * ---------------------------------------
+   */
+
+  const startPractice = (
+    selectedQuestions
+  ) => {
+    if (
+      !selectedQuestions ||
+      selectedQuestions.length === 0
+    ) {
+      return;
+    }
+
+    const practiceSession =
+      selectedQuestions.map(
+        (question) => ({
+          ...question,
+          sessionType: "new",
+        })
+      );
+
+    setSessionQuestions(
+      practiceSession
+    );
+
+    setSessionTotalQuestions(
+      practiceSession.length
+    );
+
+    setSessionNewCount(
+      practiceSession.length
+    );
+
+    setSessionRevisionCount(
+      0
     );
 
     setCompletedNewCount(0);
@@ -734,16 +836,19 @@ function Dashboard() {
             "importance"
           ) {
             return (
-              (Number(
+              getImportanceWeight(
                 b.importance
-              ) || 0) -
-              (Number(
+              ) -
+              getImportanceWeight(
                 a.importance
-              ) || 0)
+              )
             );
           }
 
-          return 0;
+          return (
+            a.learningOrder -
+            b.learningOrder
+          );
         }
       );
 
@@ -897,6 +1002,17 @@ function Dashboard() {
           />
 
         </div>
+
+        {/* PRACTICE MODE */}
+
+        <PracticePanel
+          questions={
+            questions
+          }
+          startPractice={
+            startPractice
+          }
+        />
 
         {/* DAILY MISSION */}
 
@@ -1180,7 +1296,7 @@ function Dashboard() {
               }
             >
               <option value="default">
-                Default Order
+                Learning Order
               </option>
 
               <option value="difficulty">
