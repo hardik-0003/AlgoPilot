@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import QuestionDetails from "./pages/QuestionDetails";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Analytics from "./pages/Analytics";
 
 function ProtectedRoute({ children }) {
   const currentUser =
@@ -93,6 +94,17 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Analytics */}
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
             </ProtectedRoute>
           }
         />
