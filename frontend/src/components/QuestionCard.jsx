@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function QuestionCard({
   question,
   completeQuestion,
@@ -40,13 +42,10 @@ function QuestionCard({
         {question.attempts || 0}
       </p>
 
-      {/* -------------------------------- */}
       {/* SOLVED INFORMATION */}
-      {/* -------------------------------- */}
 
       {question.solved && (
         <>
-
           <p>
             <strong>Status:</strong>{" "}
             ✓ Solved
@@ -74,15 +73,22 @@ function QuestionCard({
                 ).toLocaleDateString()
               : "Not scheduled"}
           </p>
-
         </>
       )}
 
-      {/* -------------------------------- */}
       {/* ACTIONS */}
-      {/* -------------------------------- */}
 
       <div className="question-actions">
+
+        {/* QUESTION DETAILS */}
+
+        <Link
+          to={`/question/${question.id}`}
+        >
+          View Details →
+        </Link>
+
+        {/* LEETCODE */}
 
         <a
           href={question.leetcodeUrl}
@@ -91,6 +97,8 @@ function QuestionCard({
         >
           Open on LeetCode →
         </a>
+
+        {/* COMPLETE */}
 
         <button
           onClick={() =>

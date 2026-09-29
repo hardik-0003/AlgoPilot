@@ -16,7 +16,8 @@ import "../styles/Session.css";
 
 function Dashboard() {
   const [solveQuestions, setSolveQuestions] = useState(3);
-  const [revisionQuestions, setRevisionQuestions] = useState(5);
+  const [revisionQuestions, setRevisionQuestions] =
+    useState(5);
 
   const [questions, setQuestions] = useState([]);
 
@@ -43,8 +44,10 @@ function Dashboard() {
   const [completedNewCount, setCompletedNewCount] =
     useState(0);
 
-  const [completedRevisionCount, setCompletedRevisionCount] =
-    useState(0);
+  const [
+    completedRevisionCount,
+    setCompletedRevisionCount,
+  ] = useState(0);
 
   const [sessionStarted, setSessionStarted] =
     useState(false);
@@ -75,21 +78,24 @@ function Dashboard() {
 
   useEffect(() => {
     const savedQuestions =
-      localStorage.getItem("algoPilotQuestions");
+      localStorage.getItem(
+        "algoPilotQuestions"
+      );
 
     if (savedQuestions) {
-      setQuestions(JSON.parse(savedQuestions));
+      setQuestions(
+        JSON.parse(savedQuestions)
+      );
     } else {
-      const initialQuestions = questionsData.map(
-        (question) => ({
+      const initialQuestions =
+        questionsData.map((question) => ({
           ...question,
           solved: false,
           attempts: 0,
           solvedAt: null,
           revisionCount: 0,
           nextRevision: null,
-        })
-      );
+        }));
 
       setQuestions(initialQuestions);
     }
@@ -154,12 +160,17 @@ function Dashboard() {
 
           return {
             ...question,
+
             solved: true,
+
             attempts:
               (question.attempts || 0) + 1,
+
             solvedAt:
               new Date().toISOString(),
+
             revisionCount,
+
             nextRevision:
               getNextRevisionDate(
                 revisionCount
@@ -176,11 +187,15 @@ function Dashboard() {
 
         return {
           ...question,
+
           solved: true,
+
           attempts:
             (question.attempts || 0) + 1,
+
           revisionCount:
             newRevisionCount,
+
           nextRevision:
             getNextRevisionDate(
               newRevisionCount
@@ -276,11 +291,17 @@ function Dashboard() {
 
   function endSession() {
     setSessionStarted(false);
+
     setSessionQuestions([]);
+
     setSessionTotalQuestions(0);
+
     setSessionNewCount(0);
+
     setSessionRevisionCount(0);
+
     setCompletedNewCount(0);
+
     setCompletedRevisionCount(0);
   }
 
@@ -471,7 +492,9 @@ function Dashboard() {
           {/* TODAY'S MISSION */}
 
           <MissionCard
-            solveQuestions={solveQuestions}
+            solveQuestions={
+              solveQuestions
+            }
             setSolveQuestions={
               setSolveQuestions
             }
@@ -660,6 +683,7 @@ function Dashboard() {
                     </option>
                   )
                 )}
+
               </select>
 
               {/* PATTERN */}
@@ -686,6 +710,7 @@ function Dashboard() {
                     </option>
                   )
                 )}
+
               </select>
 
               {/* COMPANY */}
@@ -712,6 +737,7 @@ function Dashboard() {
                     </option>
                   )
                 )}
+
               </select>
 
               {/* SORT */}
@@ -735,6 +761,7 @@ function Dashboard() {
                 <option value="importance">
                   Importance: High → Low
                 </option>
+
               </select>
 
             </div>
