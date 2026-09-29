@@ -1,0 +1,102 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0f172a;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.app {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.app h1 {
+  font-size: 48px;
+}
+
+.app p {
+  margin-top: 10px;
+  color: #cbd5e1;
+}
+.app h1 {
+  font-size: 48px;
+  color: white;
+}
+.start-btn {
+  margin-top: 30px;
+  padding: 12px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.start-btn:hover {
+  background: #2563eb;
+}
+.counter-box{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+    margin:20px 0;
+}
+
+.counter-box button{
+
+    width:45px;
+    height:45px;
+
+    border:none;
+
+    background:#3b82f6;
+
+    color:white;
+
+    font-size:22px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+}
+
+.counter-box span{
+
+    font-size:28px;
+
+    font-weight:bold;
+
+}
+.counter-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.counter-box button {
+  width: 45px;
+  height: 45px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 22px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.counter-box button:hover {
+  background: #2563eb;
+}
+
+.counter-box span {
+  font-size: 28px;
+  font-weight: bold;
+}

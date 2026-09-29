@@ -1,0 +1,63 @@
+/* ==========================
+   Progress Section
+========================== */
+
+.progress-section {
+  width: 750px;
+  margin: 40px auto;
+}
+
+.progress-section h2 {
+  margin-bottom: 20px;
+}
+
+/* ==========================
+   Progress Cards
+========================== */
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.progress-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.progress-card h3 {
+  color: #64748b;
+  font-size: 15px;
+}
+
+.progress-card h1 {
+  margin-top: 10px;
+  font-size: 35px;
+}
+
+/* ==========================
+   Topic Progress
+========================== */
+
+.topic-progress {
+  margin-top: 25px;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.topic-progress h3 {
+  margin-bottom: 15px;
+}
+
+.topic-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
