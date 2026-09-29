@@ -15,12 +15,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .session-header h2 {
-  margin: 0;
+  margin: 0 0 8px 0;
 }
+
+.session-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+/* ==========================
+   Exit Button
+========================== */
 
 .end-session-btn {
   padding: 10px 18px;
@@ -29,6 +38,7 @@
   background: #64748b;
   color: white;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .end-session-btn:hover {
@@ -36,11 +46,109 @@
 }
 
 /* ==========================
-   Session Questions
+   Session Progress
+========================== */
+
+.session-progress {
+  background: white;
+  padding: 22px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.session-progress-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.session-progress p {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ==========================
+   Session Summary
+========================== */
+
+.session-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.session-summary-card {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.session-summary-card span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.session-summary-card strong {
+  font-size: 22px;
+}
+
+/* ==========================
+   Questions
 ========================== */
 
 .session-questions {
   margin-top: 25px;
+}
+
+.session-questions > h3 {
+  margin-bottom: 15px;
+}
+
+.session-question-wrapper {
+  margin-bottom: 25px;
+}
+
+/* ==========================
+   Question Type
+========================== */
+
+.question-type {
+  margin-bottom: -5px;
+  position: relative;
+  z-index: 1;
+}
+
+.question-type span {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px 8px 0 0;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
 }
 
 /* ==========================
@@ -49,9 +157,68 @@
 
 .session-complete {
   margin-top: 30px;
-  padding: 40px;
+  padding: 50px 30px;
   background: white;
-  border-radius: 15px;
+  border-radius: 18px;
   text-align: center;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.session-complete-icon {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+.session-complete h2 {
+  margin-bottom: 15px;
+}
+
+.session-complete p {
+  color: #64748b;
+  margin: 8px 0;
+}
+
+.complete-session-btn {
+  margin-top: 25px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.complete-session-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ==========================
+   Responsive
+========================== */
+
+@media (max-width: 800px) {
+  .session-page {
+    width: 90%;
+  }
+
+  .session-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .session-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+.completion-breakdown {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.completion-breakdown p {
+  margin: 8px 0;
 }

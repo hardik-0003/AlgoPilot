@@ -1,6 +1,7 @@
 function QuestionCard({
   question,
   completeQuestion,
+  sessionType = "new",
 }) {
   return (
     <div className="question-card">
@@ -39,8 +40,13 @@ function QuestionCard({
         {question.attempts || 0}
       </p>
 
+      {/* -------------------------------- */}
+      {/* SOLVED INFORMATION */}
+      {/* -------------------------------- */}
+
       {question.solved && (
         <>
+
           <p>
             <strong>Status:</strong>{" "}
             ✓ Solved
@@ -68,8 +74,13 @@ function QuestionCard({
                 ).toLocaleDateString()
               : "Not scheduled"}
           </p>
+
         </>
       )}
+
+      {/* -------------------------------- */}
+      {/* ACTIONS */}
+      {/* -------------------------------- */}
 
       <div className="question-actions">
 
@@ -84,11 +95,14 @@ function QuestionCard({
         <button
           onClick={() =>
             completeQuestion(
-              question.id
+              question.id,
+              sessionType
             )
           }
         >
-          {question.solved
+          {sessionType === "revision"
+            ? "✓ Complete Revision"
+            : question.solved
             ? "✓ Complete Revision"
             : "Mark as Solved"}
         </button>

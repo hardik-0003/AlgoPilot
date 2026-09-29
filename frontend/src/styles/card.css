@@ -224,3 +224,8 @@
   padding: 12px 0;
   border-bottom: 1px solid #e2e8f0;
 }
+.results-count {
+  margin: 15px 0;
+  color: #64748b;
+  font-size: 14px;
+}
